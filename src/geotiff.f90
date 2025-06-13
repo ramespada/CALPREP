@@ -244,7 +244,7 @@ subroutine TIFF_Open(iUnit,inpFile,action,tiff,iost)
         
         ![  ] Read GeoKeys from GeoDir
         if ( hasTag(tiff, 1, GTIFF_GeoKeyDirectoryTag) ) then 
-            print*, "GeoTIFF File!"
+            !print*, "GeoTIFF File!"
             call GTIFF_READ_GDIR(tiff)
 
             !Raster coordinates and scale parameters:
@@ -259,9 +259,9 @@ subroutine TIFF_Open(iUnit,inpFile,action,tiff,iost)
         endif
 
         if      ( hasTag(tiff,1, TIFF_TileOffsets ) ) then 
-           print*, " Tiled type!"; tiff%ImgType='tile'
+           !print*, " Tiled type!"; tiff%ImgType='tile'
         else if ( hasTag(tiff, 1, TIFF_StripOffsets) ) then
-           print*, " Strip type!"; tiff%ImgType='strip'
+           !print*, " Strip type!"; tiff%ImgType='strip'
         else
            stop "ERROR. Image type not identified!"
         end if
@@ -286,7 +286,7 @@ subroutine TIFF_READ_HEADER(tiff)
    character(len=1) :: cha_1(2)
    integer (kind=1) :: magic_1(2), offset_1(4)
 
-   print*,'  Reading 8-byte header..'
+   !print*,'  Reading 8-byte header..'
    read(unit=tiff%iUnit, rec=1) cha_1(1)     ! endianness 
    read(unit=tiff%iUnit, rec=2) cha_1(2)     ! endianness 
    tiff%byteOrder=transfer([cha_1(1),cha_1(2)],tiff%byteOrder)
@@ -311,7 +311,7 @@ subroutine TIFF_READ_HEADER(tiff)
    if ( tiff%magic_num /= 42 ) stop 'Fatal ERROR: Not a TIFF file..' !Check magic-number (TIFF format identifier)
    if ( tiff%offset     < 0  ) tiff%offset = tiff%offset + intAdj4   !Adjustment for 4-byte unsigned integers
    !=================================!
-   print '("   Header: ",A3, I4, I12)',tiff%byteOrder,tiff%magic_num,tiff%offset
+   !print '("   Header: ",A3, I4, I12)',tiff%byteOrder,tiff%magic_num,tiff%offset
 end subroutine 
 
 subroutine TIFF_READ_IFDs(tiff)
@@ -324,7 +324,7 @@ subroutine TIFF_READ_IFDs(tiff)
   tmp_offset=tiff%offset
   i=1
   do while (tmp_offset /= 0) !
-     print '("   Image File Directory (IFD): ",I6)', i
+     !print '("   Image File Directory (IFD): ",I6)', i
 
      if (i > size(tiff%IFD) ) stop 'Too many IFDs. Change max number of IFDs admitted for TIFF files in the source code.'
 
@@ -339,7 +339,7 @@ subroutine TIFF_READ_IFDs(tiff)
         tiff%IFD(i)%n_tags = transfer([ntags_1        ,0_1,0_1], int(1))
      end if
 
-     print '("    # of Tags in IFD: ",I12)', tiff%IFD(i)%n_Tags 
+     !print '("    # of Tags in IFD: ",I12)', tiff%IFD(i)%n_Tags 
      if ( .not. allocated(tiff%IFD(i)%tag) ) allocate( tiff%IFD(i)%tag( tiff%IFD(i)%n_Tags ))
 
      do t=1,tiff%IFD(i)%n_tags
@@ -372,7 +372,7 @@ subroutine TIFF_READ_IFDs(tiff)
         if ( tiff%IFD(i)%tag(t)%Cnt    < 0 )  tiff%IFD(i)%tag(t)%Cnt   =tiff%IFD(i)%tag(t)%Cnt    +  intAdj4 
         if ( tiff%IFD(i)%tag(t)%Offset < 0 )  tiff%IFD(i)%tag(t)%Offset=tiff%IFD(i)%tag(t)%Offset +  intAdj4 
 
-        call print_tag(t,tiff%IFD(i)%tag(t))
+        !call print_tag(t,tiff%IFD(i)%tag(t))
      end do
 
      read(unit=tiff%iUnit, rec=tmp_offset+2+tiff%IFD(i)%n_Tags*12+1) ioff_1(1) !IFD Offset  (1)
@@ -385,7 +385,7 @@ subroutine TIFF_READ_IFDs(tiff)
      else
         tmp_offset    = transfer(ioff_1        , tmp_offset)
      end if
-     print '("   IFD offset: ",i5)',tmp_offset
+     !print '("   IFD offset: ",i5)',tmp_offset
      i=i+1
   end do
   tiff%n_imgs=i-1
@@ -403,10 +403,10 @@ subroutine GTIFF_READ_GDIR(tiff)
       call get_tag_parameters(tiff,1,GTIFF_GeoDoubleParamsTag,typ,cnt,tiff%gDir%OffsetFloat,found) !offset of geoDir
       call get_tag_parameters(tiff,1,GTIFF_GeoAsciiParamsTag ,typ,cnt,tiff%gDir%OffsetAscii,found) !offset of geoDir
 
-      print '("   GeoTIFF Keys Directory (geoDir): ",I6)'
+      !print '("   GeoTIFF Keys Directory (geoDir): ",I6)'
       call get_tag_parameters(tiff,1,GTIFF_geoKeyDirectoryTag,typ,cnt,gDirOffset,found) !offset of geoDir
 
-      print '("    Offset Float Keys=",I3,/,"    Offset ASCII Keys=",I3)',tiff%gDir%offsetFloat, tiff%gDir%offsetAscii 
+      !print '("    Offset Float Keys=",I3,/,"    Offset ASCII Keys=",I3)',tiff%gDir%offsetFloat, tiff%gDir%offsetAscii 
 
       read(unit=tiff%iUnit, rec=gDirOffset+1)  v_1(1)       ! version        - read but not used
       read(unit=tiff%iUnit, rec=gDirOffset+2)  v_1(2)       ! version        - read but not used
@@ -429,7 +429,7 @@ subroutine GTIFF_READ_GDIR(tiff)
           tiff%gDir%n_keys        = transfer([ nk_1, 0_1,0_1], int(1) )
       end if
       allocate(tiff%gDir%key(tiff%gDir%n_Keys))
-      print '("    # of Keys in gDir: ",I6)', tiff%gDir%n_Keys
+      !print '("    # of Keys in gDir: ",I6)', tiff%gDir%n_Keys
       do k=1,tiff%gDir%n_Keys
          read(unit=tiff%iUnit, rec=gDirOffset+8+(k-1)*8+1)  id_1(1) !id
          read(unit=tiff%iUnit, rec=gDirOffset+8+(k-1)*8+2)  id_1(2) !id
@@ -457,7 +457,7 @@ subroutine GTIFF_READ_GDIR(tiff)
          if ( tiff%gDir%key(k)%Cnt    < 0 )  tiff%gDir%key(k)%Cnt   = tiff%gDir%key(k)%Cnt    +  intAdj4
          if ( tiff%gDir%key(k)%Offset < 0 )  tiff%gDir%key(k)%Offset= tiff%gDir%key(k)%Offset +  intAdj4 
          
-         call print_key(k,tiff%gDir%key(k))
+         !call print_key(k,tiff%gDir%key(k))
       enddo
 end subroutine
 
@@ -912,7 +912,7 @@ subroutine print_tag(t,tag)
  implicit none
  integer      , intent(in) :: t
  type(TIFF_TAG), intent(in) :: tag
- print '("    Tag ",i2,":",i9," (",A22,")",i10," (",A6,")", i12,i12)',t, tag%Id, tagName(tag%Id), tag%Typ, tagTypeName(tag%Typ), tag%Cnt, tag%Offset 
+ print '("    Tag ",i2,":",i9," (",A22,")",i10," (",A6,")", i6,"->",i6)',t, tag%Id, tagName(tag%Id), tag%Typ, tagTypeName(tag%Typ), tag%Cnt, tag%Offset 
 end subroutine
 
 subroutine print_key(k,key)
@@ -937,7 +937,7 @@ subroutine debug_print_tiff_content(tiff)
    enddo
    print*, "  GDir", tiff%gDir%n_Keys
    do k=1,tiff%gDir%n_Keys
-      call print_key(k,tiff%gDir%key(k))
+      !call print_key(k,tiff%gDir%key(k))
    enddo
 end subroutine
 

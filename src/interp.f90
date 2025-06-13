@@ -209,8 +209,8 @@ subroutine remap_avg(g0,z0, g1,z1)
    real(8) :: xmin0,ymin0,dx0,dy0
    print*,"  Average remap method."
 
+   do j=1,g1%ny
    do i=1,g1%nx
-      do j=1,g1%ny
 
         !Position where to interpolate
         px=g1%xmin+g1%dx*i;  py=g1%ymin+g1%dy*j        !target cell coordinates
@@ -238,7 +238,7 @@ subroutine remap_avg(g0,z0, g1,z1)
         else
            z1(i,j) = 0.0                         ! or some missing value
         end if
-      enddo
+   enddo
    enddo
 end subroutine
 

@@ -53,7 +53,6 @@ subroutine make_geo(terrain_file,lulc_file, xc,yc,dx,dy,nx,ny,proj,lulc_lookup) 
    allocate( Ha(g%nx,g%ny))  
    allocate(lai(g%nx,g%ny))  
 
-   !
    !Topography
    call get_topo(terrain_file,g,z)
 
@@ -242,37 +241,37 @@ subroutine write_geo(g,z,lu,a0,b0,z0,H,Ha,LAI)
          write(io7,'(10(i7,a1))') (lu(n,j),ccomma,n=1,g%nx-1),lu(g%nx,j)
       enddo
       !TERRAIN:
-      write(io7,'(1x,f6.4,1x," - ",a70)') 1.0,'TERRAIN heights - HTFAC (Conversion to meters)'
+      write(io7,'(1x,f6.4,1x," - ",70a)') 1.0,'TERRAIN heights - HTFAC (Conversion to meters)'
       do j=g%ny,1,-1
          write(io7,'(100(f7.2,a1))') (z(n,j),ccomma,n=1,g%nx-1),z(g%nx,j)
       enddo
       !Z0
-      write(io7,'(1x,"2",3x," - ",a70)') 'gridded z0 field'
+      write(io7,'(1x,"2",3x," - ",70a)') 'gridded z0 field'
       do j=g%ny,1,-1
          write(io7,'(100(f7.2,a1))') (z0(n,j),ccomma,n=1,g%nx-1),z0(g%nx,j)
       enddo
       !A0
-      write(io7,'(1x,"2",3x," - ",a70)') 'gridded albedo field'
+      write(io7,'(1x,"2",3x," - ",70a)') 'gridded albedo field'
       do j=g%ny,1,-1
          write(io7,'(100(f7.2,a1))') (a0(n,j),ccomma,n=1,g%nx-1),a0(g%nx,j)
       enddo
       !B0
-      write(io7,'(1x,"2",3x," - ",a70)') 'gridded Bowen ratio field'
+      write(io7,'(1x,"2",3x," - ",70a)') 'gridded Bowen ratio field'
       do j=g%ny,1,-1
          write(io7,'(100(f7.2,a1))') (b0(n,j),ccomma,n=1,g%nx-1),b0(g%nx,j)
       enddo
       !H
-      write(io7,'(1x,"2",3x," - ",a70)') 'gridded soil heat flux parameters'
+      write(io7,'(1x,"2",3x," - ",70a)') 'gridded soil heat flux parameters'
       do j=g%ny,1,-1
          write(io7,'(100(f7.2,a1))') (H(n,j),ccomma,n=1,g%nx-1),H(g%nx,j)
       enddo
       !H_antro
-      write(io7,'(1x,"2",3x," - ",a70)') 'gridded anthropogenic heat flux field'
+      write(io7,'(1x,"2",3x," - ",70a)') 'gridded anthropogenic heat flux field'
       do j=g%ny,1,-1
          write(io7,'(100(f7.2,a1))') (Ha(n,j),ccomma,n=1,g%nx-1),Ha(g%nx,j)
       enddo
       !LAI
-      write(io7,'(1x,"2",3x," - ",a70)') 'gridded leaf area index field'
+      write(io7,'(1x,"2",3x," - ",70a)') 'gridded leaf area index field'
       do j=g%ny,1,-1
          write(io7,'(100(f7.2,a1))') (LAI(n,j),ccomma,n=1,g%nx-1),LAI(g%nx,j)
       enddo
@@ -303,7 +302,7 @@ subroutine map_categories(iarr,lookup)
          read(right, *) val
 
          if ( key /= val) then
-                 print*, "map: key -> val",key, val
+                 print '("     - mapping key",i5,"->","val",i5)',key, val
             where (iarr == key)
               iarr = val
             end where

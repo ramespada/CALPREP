@@ -11,8 +11,8 @@ module prep_surf
 
    type observation
       type(datetime) :: date             !datetime of observation
-      real    :: ws,wd,tmp,pres,prate,vis !windspeed [m/s], winddir [deg], temp[k], pressure [mb], precipitation [mm]
-      integer :: iceil,icc,irh,ipcode    !ceiling-height [m], opaque sky cov. [tenths], rel. humidity [%], precip code
+      real    :: ws=0,wd=0,tmp=0,pres=0,prate=0,vis=0 !windspeed [m/s], winddir [deg], temp[k], pressure [mb], precipitation [mm]
+      integer :: iceil=0,icc=0,irh=0,ipcode=0    !ceiling-height [m], opaque sky cov. [tenths], rel. humidity [%], precip code
       logical :: valid=.false.
    end type
 
@@ -283,6 +283,28 @@ subroutine write_Surf_Dat(oFile, S,sdate,edate)
    type(observation)          :: O
    integer :: i,t
    integer :: NSTA, N_Hours, Time_zone
+
+   !character(4 ) :: cname(nsta)
+   !character(16) :: clat(nsta),clon(nsta)
+   character(12) ::  cver,clev
+   character(1 ) :: q
+
+   character(4 ) :: xyunit
+   character(8 ) :: datum, pmap
+   character(12) ::  daten
+   character(16) ::  dataset,dataver
+   character(64) ::  datamod
+   character(80) ::  comment1
+   integer       :: ncomment
+   character(16) :: lat,lon,alt
+   integer :: id
+   character(1) :: hemi1="N",hemi2="E"
+
+! --- Configure output variables
+   data dataset/'SURF.DAT'/, dataver/'2.1'/
+   data datamod/'Hour Start and End Times with Seconds'/
+   data q/''''/
+
    !--------------------------------------------------------
    !SURF.DAT FILE FORMAT:
    !Header:
@@ -301,27 +323,38 @@ subroutine write_Surf_Dat(oFile, S,sdate,edate)
    Time_zone =S(1)%Time_zone
 
    !Header:
-   write(io,*) "SURF.DAT 2.1 Hour Start and End Times with Seconds"
-   write(io,*) "1"
-   write(io,*) "Produced by CALPREP v0.0"
-   write(io,*) "NONE"
-   !write(io) Time_zone
+   write(io,'(2a16,a64)') dataset,dataver,datamod
+   write(io,'(i4)') 1                                     !ncomment
+   write(io,'(a80)') 'Produced by CALPREP Version 0.0.0 ' !comment1
+   write(io,'(a8)') 'LL      '                    !pmap
+   write(io,'(a8,a10)') 'WGS-G   ','10-10-2002'   !datum, daten
+   write(io,'(a4)') 'DEG '                        !xyunit
+   write(io,'(a8)') "UTC-0500"                    !axtz UTC-HHMM
 
    !Start / End time
    write(io,*), sdate%strftime(" %Y %j  %H   %S"), edate%strftime(" %Y %j  %H   %S"), NSTA !2(i6,2i4,i6),i5   ,Time_zone
 
    !Station coordinates
    do i=1,NSTA
-      write(io,'(i8," ",a4,"  ",2(f11.5,"  "),f10.2)')atoi(S(i)%id),"----",S(i)%lat,S(i)%lon,S(i)%alt
-   enddo
+     !write(io,'(i8," ",a4,"  ",2(f11.5,"  "),f10.2)')atoi(S(i)%id),"----",S(i)%lat,S(i)%lon,S(i)%alt
+     hemi1="N";hemi2="E"
+     if ( S(i)%lat < 0 )  hemi1="S" 
+     if ( S(i)%lon < 0 )  hemi2="W" 
+     write(lat,'(f15.6,1a)') S(i)%lat,hemi1
+     write(lon,'(f15.6,1a)') S(i)%lon,hemi2
+     !write(alt,'(f10.3)') S(i)%alt
+     id=atoi(S(i)%id)
+      !write(io,'(i8,2x,a1,a4,a1,2x,2(a1,a16:,a1,2x),f10.2)')id,q,"----",q,q,adjustl(lat),q,q,adjustl(lon),q,S(i)%alt
+      write(io,'(i8,2x,a1,a4,a1,2x,2(a1,a16:,a1,2x),f10.2)')id,q,"----",q,q,adjustl(lat),q,q,adjustl(lon),q,S(i)%alt
+      enddo
 
    !Body:
    do t=1,N_Hours
-      write(io,*) S(1)%O(t)%date%strftime("%Y %j %H")
+      write(io,*) S(1)%O(t)%date%strftime("%Y %-j %-H %-S "),S(1)%O(t+1)%date%strftime(" %Y %-j %-H %-S")
       do i=1, NSTA
          o=S(i)%O(t)
          !write(io,'(1x,f8.3,1x,f8.3,1x,i4,1x,i4,1x,f8.3,1x,i4,1x,f8.3,1x,i4)') o%ws,o%wd,o%iceil,o%icc,o%tmp,o%irh,o%pres,o%ipcode
-         write(io,'(f9.3,f9.3,i5,i5,f9.3,i5,f9.3,i5)') o%ws,o%wd,o%iceil,o%icc,o%tmp,o%irh,o%pres,o%ipcode
+         write(io,'(f8.3,f8.3,i6,i6,f9.3,i6,f9.3,i6)') o%ws,o%wd,o%iceil,o%icc,o%tmp,o%irh,o%pres,o%ipcode
       end do
    end do
 
