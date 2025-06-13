@@ -229,7 +229,7 @@ subroutine write_header(io, s, sdate, edate, pStop)
     character(8 )::  pmap='NONE    '!, datum='WGS-G   ',xyunit='DEG '
     character(16):: dataset='UP.DAT',dataver='2.1'
     character(64):: datamod='Hour Start and End Times with Seconds'
-    character(80):: comment1='Produced by PREP-CALMET v0.0'
+    character(80):: comment1='Produced by CALPREP v0.0'
     integer      :: ncomment=1
     logical      :: LHT=.true.,LTEMP=.true.,LWD=.false.,LWS=.false.
     ! --- Configure output variables

@@ -77,55 +77,89 @@ Edit the control file `namelist.calprep`:
 /
 ```
 
-Notice that the `lulc_lookup` variable defines the mappings between your land use data categories to CALMET land use categories:
-
-
-
-| id | CALMET (level I)         | id  | CALMET (level II)                             |
-|----|--------------------------|-----|-----------------------------------------------|
-| 10 |  Urban or Built-up Land  |  11 | Residential                                   | 
-|    |                          |  12 | Comercial and services                        | 
-|    |                          |  13 | Industrial                                    | 
-|    |                          |  14 | Transportation, communications and utilities  | 
-|    |                          |  15 | Industrial and compercial complexes           | 
-|    |                          |  16 | Mixed Urban or Built-up Land                  | 
-|    |                          |  17 | Other Urban or Built-up Land                  | 
-| 20 |  Agricultural Land       |  21 | Cropland and pasture                          |                          
-|    |                          |  22 | Orchards, groves, vineyards, nurseries and ornamental horticultural|
-|    |                          |  23 | Confined Feeding operation                    | 
-|    |                          |  24 | Other agricultural land                       | 
-| 30 |  Rangeland               |  31 | Herbaceous rangeland                          | 
-|    |                          |  32 | Shrub and brush rangeland                     | 
-|    |                          |  33 | Mixed rangeland                               | 
-| 40 |  Forest Land             |  41 | Deciduous forest                              | 
-|    |                          |  42 | Evergreen forest                              | 
-|    |                          |  43 | Mixed forest                                  | 
-| 50 |  Water                   |  51 | Streams and canals                            | 
-|    |                          |  52 | Lakes                                         | 
-|    |                          |  53 | Reservoirs                                    | 
-|    |                          |  54 | Bays and estuaries                            | 
-|    |                          |  55 | Oceand and seas                               | 
-| 60 |  Wetland                 |  61 | Forested wetland                              | 
-|    |                          |  62 | Non-forested wetland                          | 
-|    |                          |  71 | Dry salt flats                                | 
-| 70 |  Barren Land             |  72 | Beaches                                       | 
-|    |                          |  73 | Sandy areas                                   | 
-|    |                          |  74 | Bare exposed rock                             | 
-|    |                          |  75 | Strip mines                                   | 
-|    |                          |  76 | Transitional areas                            | 
-|    |                          |  77 | Mixed barren                                  | 
-| 80 |  Tundra                  |  81 | Shrub and brush tundra                        | 
-|    |                          |  82 | Herbaceous tundra                             | 
-|    |                          |  83 | Bare ground                                   | 
-|    |                          |  84 | Wet tundra                                    | 
-|    |                          |  85 | Mixed tundra                                  | 
-| 90 |  Perennial Snow or Ice   |  91 | Perenial snowfields                           | 
-|    |                          |  92 | Glaciers                                      | 
-
-
 Finally, place the executable file in your work directory and run it:
 
 ```shell
 ./CALPREP.EXE
 
 ```
+
+### Land Use Category Mapping
+
+The `lulc_lookup` variable is used to define how your land use data categories map to CALMET’s land use categories. The mapping format is:
+
+```
+<input_category>:<calmet_category>
+```
+
+For example, if the water category in your land use dataset is represented by the value **11**, and you know this corresponds to a lake (CALMET category **52**), you should include the mapping as:
+
+```
+11:52
+```
+
+Make sure every category in your land use dataset is mapped to a CALMET category — without exception — to avoid processing errors.
+
+Below are all of CALMET’s land use categories:
+
+| id  | CALMET (level II)                             |
+|-----|-----------------------------------------------|
+|  11 | Residential                                   | 
+|  12 | Comercial and services                        | 
+|  13 | Industrial                                    | 
+|  14 | Transportation, communications and utilities  | 
+|  15 | Industrial and compercial complexes           | 
+|  16 | Mixed Urban or Built-up Land                  | 
+|  17 | Other Urban or Built-up Land                  | 
+|  21 | Cropland and pasture                          |                          
+|  22 | Orchards, groves, vineyards, nurseries and ornamental horticultural|
+|  23 | Confined Feeding operation                    | 
+|  24 | Other agricultural land                       | 
+|  31 | Herbaceous rangeland                          | 
+|  32 | Shrub and brush rangeland                     | 
+|  33 | Mixed rangeland                               | 
+|  41 | Deciduous forest                              | 
+|  42 | Evergreen forest                              | 
+|  43 | Mixed forest                                  | 
+|  51 | Streams and canals                            | 
+|  52 | Lakes                                         | 
+|  53 | Reservoirs                                    | 
+|  54 | Bays and estuaries                            | 
+|  55 | Oceand and seas                               | 
+|  61 | Forested wetland                              | 
+|  62 | Non-forested wetland                          | 
+|  71 | Dry salt flats                                | 
+|  72 | Beaches                                       | 
+|  73 | Sandy areas                                   | 
+|  74 | Bare exposed rock                             | 
+|  75 | Strip mines                                   | 
+|  76 | Transitional areas                            | 
+|  77 | Mixed barren                                  | 
+|  81 | Shrub and brush tundra                        | 
+|  82 | Herbaceous tundra                             | 
+|  83 | Bare ground                                   | 
+|  84 | Wet tundra                                    | 
+|  85 | Mixed tundra                                  | 
+|  91 | Perenial snowfields                           | 
+|  92 | Glaciers                                      | 
+
+
+
+### Terrain and Land Use Preparation
+
+It is recommended to use a single file that covers the entire project domain for both terrain and land use data. To prepare this file, follow these two steps:
+
+Merge all relevant files to ensure the full domain is covered. Include all files that overlap with the project area:
+
+```shell
+gdal_merge.py -o merged.tif <file_1.tif> <file_2.tif> ... <file_n.tif>
+```
+
+Crop the merged file to the exact region of interest using the target extent:
+
+```shell
+    gdalwarp -te <xmin> <ymin> <xmax> <ymax> merged.tif cropped.tif
+```
+
+
+

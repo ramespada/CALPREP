@@ -303,7 +303,7 @@ subroutine write_Surf_Dat(oFile, S,sdate,edate)
    !Header:
    write(io,*) "SURF.DAT 2.1 Hour Start and End Times with Seconds"
    write(io,*) "1"
-   write(io,*) "Produced by PREP-CALMET v0.0"
+   write(io,*) "Produced by CALPREP v0.0"
    write(io,*) "NONE"
    !write(io) Time_zone
 

@@ -224,58 +224,58 @@ subroutine write_geo(g,z,lu,a0,b0,z0,H,Ha,LAI)
 
    open(io7,file='geo.dat', action='write',status='replace')
    
-         !HEADER:
-         !write(io7,'("GEO.DAT",/,"1",/,"Produced by makegeo v0.0",/)') !title
-         !write(io7,'(A)') g%proj                                       !proj 
-         !write(io7,'(i6,i6,4(f12.4))') g%nx,g%ny, g%xmin,g%ymin, g%dx,g%dy!grid 
-         !write(io7,'(a4)') 'm' 
-         !write(io7,'(a12)') start_date
-         write(io7,*)"ncols",     g%nx
-         write(io7,*)"nrows",     g%ny
-         write(io7,*)"xllcorner", g%xmin
-         write(io7,*)"yllcorner", g%ymin   
-         write(io7,*)"cellsize",  g%dx
-         write(io7,*)"NODATA_value", -9999  
+      !HEADER:
+      !write(io7,'("GEO.DAT",/,"1",/,"Produced by makegeo v0.0",/)') !title
+      !write(io7,'(A)') g%proj                                       !proj 
+      !write(io7,'(i6,i6,4(f12.4))') g%nx,g%ny, g%xmin,g%ymin, g%dx,g%dy!grid 
+      !write(io7,'(a4)') 'm' 
+      !write(io7,'(a12)') start_date
+      write(io7,*)"ncols",     g%nx
+      write(io7,*)"nrows",     g%ny
+      write(io7,*)"xllcorner", g%xmin
+      write(io7,*)"yllcorner", g%ymin   
+      write(io7,*)"cellsize",  g%dx
+      write(io7,*)"NODATA_value", -9999  
 
-         !LANDUSE:
-         do j=g%ny,1,-1
-            write(io7,'(10(i7,a1))') (lu(n,j),ccomma,n=1,g%nx-1),lu(g%nx,j)
-         enddo
-         !TERRAIN:
-         write(io7,'(1x,f6.4,1x," - ",a70)') 1.0,'TERRAIN heights - HTFAC (Conversion to meters)'
-         do j=g%ny,1,-1
-            write(io7,'(100(f7.2,a1))') (z(n,j),ccomma,n=1,g%nx-1),z(g%nx,j)
-         enddo
-         !Z0
-         write(io7,'(1x,"2",3x," - ",a70)') 'gridded z0 field'
-         do j=g%ny,1,-1
-            write(io7,'(100(f7.2,a1))') (z0(n,j),ccomma,n=1,g%nx-1),z0(g%nx,j)
-         enddo
-         !A0
-         write(io7,'(1x,"2",3x," - ",a70)') 'gridded albedo field'
-         do j=g%ny,1,-1
-            write(io7,'(100(f7.2,a1))') (a0(n,j),ccomma,n=1,g%nx-1),a0(g%nx,j)
-         enddo
-         !B0
-         write(io7,'(1x,"2",3x," - ",a70)') 'gridded Bowen ratio field'
-         do j=g%ny,1,-1
-            write(io7,'(100(f7.2,a1))') (b0(n,j),ccomma,n=1,g%nx-1),b0(g%nx,j)
-         enddo
-         !H
-         write(io7,'(1x,"2",3x," - ",a70)') 'gridded soil heat flux parameters'
-         do j=g%ny,1,-1
-            write(io7,'(100(f7.2,a1))') (H(n,j),ccomma,n=1,g%nx-1),H(g%nx,j)
-         enddo
-         !H_antro
-         write(io7,'(1x,"2",3x," - ",a70)') 'gridded anthropogenic heat flux field'
-         do j=g%ny,1,-1
-            write(io7,'(100(f7.2,a1))') (Ha(n,j),ccomma,n=1,g%nx-1),Ha(g%nx,j)
-         enddo
-         !LAI
-         write(io7,'(1x,"2",3x," - ",a70)') 'gridded leaf area index field'
-         do j=g%ny,1,-1
-            write(io7,'(100(f7.2,a1))') (LAI(n,j),ccomma,n=1,g%nx-1),LAI(g%nx,j)
-         enddo
+      !LANDUSE:
+      do j=g%ny,1,-1
+         write(io7,'(10(i7,a1))') (lu(n,j),ccomma,n=1,g%nx-1),lu(g%nx,j)
+      enddo
+      !TERRAIN:
+      write(io7,'(1x,f6.4,1x," - ",a70)') 1.0,'TERRAIN heights - HTFAC (Conversion to meters)'
+      do j=g%ny,1,-1
+         write(io7,'(100(f7.2,a1))') (z(n,j),ccomma,n=1,g%nx-1),z(g%nx,j)
+      enddo
+      !Z0
+      write(io7,'(1x,"2",3x," - ",a70)') 'gridded z0 field'
+      do j=g%ny,1,-1
+         write(io7,'(100(f7.2,a1))') (z0(n,j),ccomma,n=1,g%nx-1),z0(g%nx,j)
+      enddo
+      !A0
+      write(io7,'(1x,"2",3x," - ",a70)') 'gridded albedo field'
+      do j=g%ny,1,-1
+         write(io7,'(100(f7.2,a1))') (a0(n,j),ccomma,n=1,g%nx-1),a0(g%nx,j)
+      enddo
+      !B0
+      write(io7,'(1x,"2",3x," - ",a70)') 'gridded Bowen ratio field'
+      do j=g%ny,1,-1
+         write(io7,'(100(f7.2,a1))') (b0(n,j),ccomma,n=1,g%nx-1),b0(g%nx,j)
+      enddo
+      !H
+      write(io7,'(1x,"2",3x," - ",a70)') 'gridded soil heat flux parameters'
+      do j=g%ny,1,-1
+         write(io7,'(100(f7.2,a1))') (H(n,j),ccomma,n=1,g%nx-1),H(g%nx,j)
+      enddo
+      !H_antro
+      write(io7,'(1x,"2",3x," - ",a70)') 'gridded anthropogenic heat flux field'
+      do j=g%ny,1,-1
+         write(io7,'(100(f7.2,a1))') (Ha(n,j),ccomma,n=1,g%nx-1),Ha(g%nx,j)
+      enddo
+      !LAI
+      write(io7,'(1x,"2",3x," - ",a70)') 'gridded leaf area index field'
+      do j=g%ny,1,-1
+         write(io7,'(100(f7.2,a1))') (LAI(n,j),ccomma,n=1,g%nx-1),LAI(g%nx,j)
+      enddo
 
    close(io7)
 
