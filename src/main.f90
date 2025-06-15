@@ -18,7 +18,7 @@ program calprep
    character(len=256) :: surface_files(max_files)
    integer            :: surface_nsta
    !upperair:
-   character(len=256) :: upperair_files(10)
+   character(len=256) :: upperair_files(20)
    real               :: upperair_ptop
    !geo
    character(len=256) :: terrain_file
@@ -52,7 +52,7 @@ program calprep
    if ( prep_surf ) call ish2surf(start_date, end_date, surface_files(1:surface_nsta))
   
    !--- Upperair Met. data (IGRA) -> up.dat
-   if ( prep_up   ) call igra2up(start_date, end_date, upperair_ptop, upperair_files(1))
+   if ( prep_up   ) call igra2up(start_date, end_date, upperair_ptop, upperair_files(:))
 
    !--- Topography & surface parameters  (GTIFF) -> geo.dat
    if ( prep_geo  ) call make_geo(trim(terrain_file),trim(lulc_file), xc,yc,dx,dy,nx,ny,proj, lulc_lookup) 

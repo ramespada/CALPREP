@@ -14,7 +14,8 @@ ny         = 70,                     !domain Y-size    [n-cells]
 
 prep_surf=.true.,
 prep_up  =.true.,  
-prep_geo =.true.,
+prep_geo =.false.,
+!prep_geo =.true.,
 /
 
 &surface

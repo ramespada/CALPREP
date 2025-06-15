@@ -40,6 +40,8 @@ subroutine make_geo(terrain_file,lulc_file, xc,yc,dx,dy,nx,ny,proj,lulc_lookup) 
     
    integer :: i,j,k
 
+
+   print '("Creating geo.dat from terrain and land use files..")'
    !Initialize target interp_grid values
    call init_grid(g, xc,yc, dx,dy,nx,ny,proj)
    
@@ -206,81 +208,6 @@ subroutine get_lulc(lulc_file, g, lu, lu_lookup, freq)
   deallocate(x0,y0,lu0)
 end subroutine
 
-
-subroutine write_geo(g,z,lu,a0,b0,z0,H,Ha,LAI)
-   implicit none
-   type(interp_grid),      intent(in) :: g
-   real,                   intent(in) :: z(:,:)
-   integer,                intent(in) :: lu(:,:)
-   real   ,dimension(:,:), intent(in) :: a0,b0,z0,H,Ha,LAI
-
-
-   integer :: iost, io7=7
-   integer :: i,j,k,n
-   character(len=1) :: ccomma=","
-   
-   print '("   Writing geo.dat file..")'
-
-   open(io7,file='geo.dat', action='write',status='replace')
-   
-      !HEADER:
-      !write(io7,'("GEO.DAT",/,"1",/,"Produced by makegeo v0.0",/)') !title
-      !write(io7,'(A)') g%proj                                       !proj 
-      !write(io7,'(i6,i6,4(f12.4))') g%nx,g%ny, g%xmin,g%ymin, g%dx,g%dy!grid 
-      !write(io7,'(a4)') 'm' 
-      !write(io7,'(a12)') start_date
-      write(io7,*)"ncols",     g%nx
-      write(io7,*)"nrows",     g%ny
-      write(io7,*)"xllcorner", g%xmin
-      write(io7,*)"yllcorner", g%ymin   
-      write(io7,*)"cellsize",  g%dx
-      write(io7,*)"NODATA_value", -9999  
-
-      !LANDUSE:
-      do j=g%ny,1,-1
-         write(io7,'(10(i7,a1))') (lu(n,j),ccomma,n=1,g%nx-1),lu(g%nx,j)
-      enddo
-      !TERRAIN:
-      write(io7,'(1x,f6.4,1x," - ",70a)') 1.0,'TERRAIN heights - HTFAC (Conversion to meters)'
-      do j=g%ny,1,-1
-         write(io7,'(100(f7.2,a1))') (z(n,j),ccomma,n=1,g%nx-1),z(g%nx,j)
-      enddo
-      !Z0
-      write(io7,'(1x,"2",3x," - ",70a)') 'gridded z0 field'
-      do j=g%ny,1,-1
-         write(io7,'(100(f7.2,a1))') (z0(n,j),ccomma,n=1,g%nx-1),z0(g%nx,j)
-      enddo
-      !A0
-      write(io7,'(1x,"2",3x," - ",70a)') 'gridded albedo field'
-      do j=g%ny,1,-1
-         write(io7,'(100(f7.2,a1))') (a0(n,j),ccomma,n=1,g%nx-1),a0(g%nx,j)
-      enddo
-      !B0
-      write(io7,'(1x,"2",3x," - ",70a)') 'gridded Bowen ratio field'
-      do j=g%ny,1,-1
-         write(io7,'(100(f7.2,a1))') (b0(n,j),ccomma,n=1,g%nx-1),b0(g%nx,j)
-      enddo
-      !H
-      write(io7,'(1x,"2",3x," - ",70a)') 'gridded soil heat flux parameters'
-      do j=g%ny,1,-1
-         write(io7,'(100(f7.2,a1))') (H(n,j),ccomma,n=1,g%nx-1),H(g%nx,j)
-      enddo
-      !H_antro
-      write(io7,'(1x,"2",3x," - ",70a)') 'gridded anthropogenic heat flux field'
-      do j=g%ny,1,-1
-         write(io7,'(100(f7.2,a1))') (Ha(n,j),ccomma,n=1,g%nx-1),Ha(g%nx,j)
-      enddo
-      !LAI
-      write(io7,'(1x,"2",3x," - ",70a)') 'gridded leaf area index field'
-      do j=g%ny,1,-1
-         write(io7,'(100(f7.2,a1))') (LAI(n,j),ccomma,n=1,g%nx-1),LAI(g%nx,j)
-      enddo
-
-   close(io7)
-
-end subroutine
-
-
 subroutine map_categories(iarr,lookup)
      implicit none
      integer, intent(inout)       :: iarr(:,:)
@@ -314,6 +241,76 @@ subroutine map_categories(iarr,lookup)
 end subroutine
 
 
+subroutine write_geo(g,z,lu,a0,b0,z0,H,Ha,LAI)
+   implicit none
+   type(interp_grid),      intent(in) :: g
+   real,                   intent(in) :: z(:,:)
+   integer,                intent(in) :: lu(:,:)
+   real   ,dimension(:,:), intent(in) :: a0,b0,z0,H,Ha,LAI
+
+   integer :: iost, io7=7
+   integer :: i,j,k,n
+   character(len=1) :: ccomma=","
+   
+   print '("   Writing geo.dat file..")'
+
+   open(io7,file='geo.dat', action='write',status='replace')
+   
+      !HEADER:
+      write(io7,*)"#GEO.DAT     3.0     Produced by CALPREP version 0.0"
+      write(io7,*)"#"//adjustl(g%proj)
+      write(io7,*)"ncols",     g%nx
+      write(io7,*)"nrows",     g%ny
+      write(io7,*)"xllcorner", g%xmin
+      write(io7,*)"yllcorner", g%ymin   
+      write(io7,*)"cellsize",  g%dx
+      write(io7,*)"NODATA_value", -9999  
+
+      !LANDUSE:
+      write(io7,'("#","1",3x," - ",70a)') 'land use dat' 
+      do j=g%ny,1,-1
+         write(io7,'(10(i7,a1))') (lu(n,j),ccomma,n=1,g%nx-1),lu(g%nx,j)
+      enddo
+      !TERRAIN:
+      write(io7,'("#","1",3x," - ",70a)') 'terrain heights' 
+      do j=g%ny,1,-1
+         write(io7,'(100(f7.2,a1))') (z(n,j),ccomma,n=1,g%nx-1),z(g%nx,j)
+      enddo
+      !Z0
+      write(io7,'("#","2",3x," - ",70a)') 'gridded z0 field'
+      do j=g%ny,1,-1
+         write(io7,'(100(f7.2,a1))') (z0(n,j),ccomma,n=1,g%nx-1),z0(g%nx,j)
+      enddo
+      !A0
+      write(io7,'("#","2",3x," - ",70a)') 'gridded albedo field'
+      do j=g%ny,1,-1
+         write(io7,'(100(f7.2,a1))') (a0(n,j),ccomma,n=1,g%nx-1),a0(g%nx,j)
+      enddo
+      !B0
+      write(io7,'("#","2",3x," - ",70a)') 'gridded Bowen ratio field'
+      do j=g%ny,1,-1
+         write(io7,'(100(f7.2,a1))') (b0(n,j),ccomma,n=1,g%nx-1),b0(g%nx,j)
+      enddo
+      !H
+      write(io7,'("#","2",3x," - ",70a)') 'gridded soil heat flux parameters'
+      do j=g%ny,1,-1
+         write(io7,'(100(f7.2,a1))') (H(n,j),ccomma,n=1,g%nx-1),H(g%nx,j)
+      enddo
+      !H_antro
+      write(io7,'("#","2",3x," - ",70a)') 'gridded anthropogenic heat flux field'
+      do j=g%ny,1,-1
+         write(io7,'(100(f7.2,a1))') (Ha(n,j),ccomma,n=1,g%nx-1),Ha(g%nx,j)
+      enddo
+      !LAI
+      write(io7,'("#","2",3x," - ",70a)') 'gridded leaf area index field'
+      do j=g%ny,1,-1
+         write(io7,'(100(f7.2,a1))') (LAI(n,j),ccomma,n=1,g%nx-1),LAI(g%nx,j)
+      enddo
+
+   close(io7)
+
+end subroutine
+
+
+
 end module
-
-

@@ -18,7 +18,7 @@ module prep_surf
 
    type station
       character(len=5)               :: id                   !station id
-      integer                        :: time_zone
+      integer                        :: time_zone=0
       real                           :: lat, lon, alt        !lat,lon,altitude
       type(observation), allocatable :: O(:)                 !observation array
       integer :: valid_records                               !number of valid records
@@ -65,24 +65,24 @@ subroutine ish2surf(sdate, edate, file_list)!, nsta)
     
     do i=1,NSTA                                                    !For each station:
        iFile=file_list(i)
-       !print*,trim(iFile),i,NSTA
 
        if ( .not. allocated(S(i)%O)) allocate(S(i)%O(N_Hours))
 
        inquire(file=trim(iFile), exist=file_exists)                 !Check if input file exists.
        if ( file_exists ) then
 
-          print '("Reading file: ",(A))', trim(iFile)
+          print '("   Reading file: ",(A))', trim(iFile)
           open (io8, file=trim(iFile), action="read", status='old') !Open Input  file (IGRA file)
 
           read(io8,'(A)',iostat=ios)row
 
           !Read Station Header:                                     !Read ISH first row to get staton data.
-          S(i)%id =     row(11:15)                !station-id
-          S(i)%lat=real(atoi(row(29:34))/1000.)   !latitude
-          S(i)%lon=real(atoi(row(35:41))/1000.)   !longitude
-          S(i)%alt=real(atoi(row(47:51))/1.)      !base altitude
-          print '("Station ID: ",a7," (Lat,Lon,Alt:",f7.3,2x,f8.4,2x,f5.1,")"/)',S(i)%id, S(i)%lat, S(i)%lon, S(i)%alt
+          S(i)%id =     row(11:15)                                  !station-id
+          S(i)%lat=real(atoi(row(29:34))/1000.)                     !latitude
+          S(i)%lon=real(atoi(row(35:41))/1000.)                     !longitude
+          S(i)%alt=real(atoi(row(47:51))/1.)                        !base altitude
+
+          print '("   Station ID: ",a7," (Lat,Lon,Alt:",f7.3,2x,f8.4,2x,f5.1,")"/)',S(i)%id, S(i)%lat, S(i)%lon, S(i)%alt
 
           current_date =strptime(row(16:27),"%Y%m%d%H%M")                  !date  YYYYMMDDHHmm
           next_date    = start_date
@@ -230,7 +230,6 @@ subroutine read_ish_record(row, o)
         o%irh=nint(100.*(((173.-0.1*tmpf+dpf)/(173.+0.9*tmpf))**8))
         o%irh=max(min(o%irh,100),1)
 
-        !
         !Additional flag-associated variables:
         extra=row(106:106+nchar)
 
@@ -277,86 +276,47 @@ end subroutine
 subroutine write_Surf_Dat(oFile, S,sdate,edate)
    implicit none
    character(*)  ,intent(in)  :: oFile
-   type(station)  ,intent(in)  :: S(:)
+   type(station)  ,intent(in) :: S(:)
    type(datetime),intent(in)  :: sdate,edate
    integer                    :: io=7
    type(observation)          :: O
    integer :: i,t
    integer :: NSTA, N_Hours, Time_zone
 
-   !character(4 ) :: cname(nsta)
-   !character(16) :: clat(nsta),clon(nsta)
-   character(12) ::  cver,clev
-   character(1 ) :: q
-
-   character(4 ) :: xyunit
-   character(8 ) :: datum, pmap
-   character(12) ::  daten
    character(16) ::  dataset,dataver
    character(64) ::  datamod
-   character(80) ::  comment1
-   integer       :: ncomment
-   character(16) :: lat,lon,alt
-   integer :: id
-   character(1) :: hemi1="N",hemi2="E"
 
-! --- Configure output variables
-   data dataset/'SURF.DAT'/, dataver/'2.1'/
+   ! --- Configure output variables
+   data dataset/'SURF.DAT'/, dataver/'3.0'/
    data datamod/'Hour Start and End Times with Seconds'/
-   data q/''''/
 
-   !--------------------------------------------------------
-   !SURF.DAT FILE FORMAT:
-   !Header:
-   !#1:  READ(io,*) IBYR,IBJUL,IBHR,IEYR,IEJUL,IEHR,IBTZ,NSTA
-   !#2:  READ(io,*)(IDSTA(n),n=1,NSTA)
-   !Body:
-   !#2+n READ(io,*) IYR,IJUL,IHR,(WS(n),WD(n),ICEIL(n),ICC(n),TEMPK(n),IRH(n),PRES(n),IPCODE(n),n=1,NSTA)
-   !
-   !(*) missing values: 9999. (real)  9999 (int)
-   !--------------------------------------------------------
+   NSTA   =size(S(:))
+   N_Hours=size(S(1)%O(:))
 
    open (io, file=trim(oFile), action='write', status='replace')   !Open Output file (UP.DAT)
 
-   NSTA=size(S(:))
-   N_Hours   =size(S(1)%O(:))
-   Time_zone =S(1)%Time_zone
-
-   !Header:
-   write(io,'(2a16,a64)') dataset,dataver,datamod
-   write(io,'(i4)') 1                                     !ncomment
-   write(io,'(a80)') 'Produced by CALPREP Version 0.0.0 ' !comment1
-   write(io,'(a8)') 'LL      '                    !pmap
-   write(io,'(a8,a10)') 'WGS-G   ','10-10-2002'   !datum, daten
-   write(io,'(a4)') 'DEG '                        !xyunit
-   write(io,'(a8)') "UTC-0500"                    !axtz UTC-HHMM
-
-   !Start / End time
-   write(io,*), sdate%strftime(" %Y %j  %H   %S"), edate%strftime(" %Y %j  %H   %S"), NSTA !2(i6,2i4,i6),i5   ,Time_zone
-
-   !Station coordinates
-   do i=1,NSTA
-     !write(io,'(i8," ",a4,"  ",2(f11.5,"  "),f10.2)')atoi(S(i)%id),"----",S(i)%lat,S(i)%lon,S(i)%alt
-     hemi1="N";hemi2="E"
-     if ( S(i)%lat < 0 )  hemi1="S" 
-     if ( S(i)%lon < 0 )  hemi2="W" 
-     write(lat,'(f15.6,1a)') S(i)%lat,hemi1
-     write(lon,'(f15.6,1a)') S(i)%lon,hemi2
-     !write(alt,'(f10.3)') S(i)%alt
-     id=atoi(S(i)%id)
-      !write(io,'(i8,2x,a1,a4,a1,2x,2(a1,a16:,a1,2x),f10.2)')id,q,"----",q,q,adjustl(lat),q,q,adjustl(lon),q,S(i)%alt
-      write(io,'(i8,2x,a1,a4,a1,2x,2(a1,a16:,a1,2x),f10.2)')id,q,"----",q,q,adjustl(lat),q,q,adjustl(lon),q,S(i)%alt
-      enddo
-
-   !Body:
-   do t=1,N_Hours
-      write(io,*) S(1)%O(t)%date%strftime("%Y %-j %-H %-S "),S(1)%O(t+1)%date%strftime(" %Y %-j %-H %-S")
-      do i=1, NSTA
-         o=S(i)%O(t)
-         !write(io,'(1x,f8.3,1x,f8.3,1x,i4,1x,i4,1x,f8.3,1x,i4,1x,f8.3,1x,i4)') o%ws,o%wd,o%iceil,o%icc,o%tmp,o%irh,o%pres,o%ipcode
-         write(io,'(f8.3,f8.3,i6,i6,f9.3,i6,f9.3,i6)') o%ws,o%wd,o%iceil,o%icc,o%tmp,o%irh,o%pres,o%ipcode
-      end do
-   end do
+     !Header:
+     write(io,'(2a16,a64)') dataset,dataver,datamod
+     !Proj
+     write(io,*) 'ESPG:4326'      
+     !Start / End time
+     write(io,*) S(1)%Time_zone 
+     write(io,*) sdate%strftime("%Y %j %H %S"), edate%strftime(" %Y %j %H %S")!, NSTA 
+     !Station coordinates
+     write(io,*) NSTA
+     do i=1,NSTA
+        write(io,*) S(i)%id, S(i)%lat, S(i)%lon, S(i)%alt
+     enddo
+     !Body:
+     do t=1,N_Hours
+        !Current date
+        write(io,*) S(1)%O(t)%date%strftime("%Y %j %H %S ")!,S(1)%O(t+1)%date%strftime("%Y %-j %-H %-S")
+        !Station record (for each station)
+        do i=1, NSTA
+           o=S(i)%O(t)
+           write(io,'(f8.3,f8.3,i6,i6,f9.3,i6,f9.3,i6)') o%ws,o%wd,o%iceil,o%icc,o%tmp,o%irh,o%pres,o%ipcode
+        end do
+     end do
 
    close(io)
 end subroutine

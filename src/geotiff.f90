@@ -1217,10 +1217,10 @@ subroutine GTIFF_get_Image_Coordinates(tiff,x,y)
    enddo
 
    !Debug:
-   print '("Dimensions X:",I6," Y:",I6)',tiff%nx,tiff%ny
-   print '("Origin      :",F16.3,",",F16.3)',x0,y0
-   print '("Pixel size  :",F16.6,",",F16.6)',dx,dy
-   print '("Extent      :",F16.3,",",F16.3,",",F16.3,",",F16.3)',minval(x),minval(y),maxval(x),maxval(y)
+   !print '("   Dimensions X:",I6," Y:",I6)',tiff%nx,tiff%ny
+   !print '("   Origin      :",F16.3,",",F16.3)',x0,y0
+   !print '("   Pixel size  :",F16.6,",",F16.6)',dx,dy
+   !print '("   Extent      :",F16.3,",",F16.3,",",F16.3,",",F16.3)',minval(x),minval(y),maxval(x),maxval(y)
 
 
 

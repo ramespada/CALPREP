@@ -158,7 +158,7 @@ gdal_merge.py -o merged.tif <file_1.tif> <file_2.tif> ... <file_n.tif>
 Crop the merged file to the exact region of interest using the target extent:
 
 ```shell
-    gdalwarp -te <xmin> <ymin> <xmax> <ymax> merged.tif cropped.tif
+gdalwarp -te <xmin> <ymin> <xmax> <ymax> merged.tif cropped.tif
 ```
 
 
